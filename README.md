@@ -100,3 +100,40 @@ Open your browser and navigate to http://localhost:3000 to view the application.
 ```
 
 
+---
+
+## ✅ Features Implemented
+
+### 📊 Dashboard
+- Simple dashboard displaying lead conversion statistics.
+
+### 🧑‍💼 Lead Management
+- Add and manage leads with fields:
+  - Name, Email, LinkedIn, Company, Notes, Tags
+- View leads in:
+  - 🗂 Table format  
+  - 📌 Kanban format
+- Search and filter leads by:
+  - Name, Company, Tags, or Status (New, Contacted, Converted, Lost, etc.)
+
+### 💬 Conversation Tracking
+- Log conversations:
+  - Email, Call, LinkedIn, etc.
+- Add custom notes per lead.
+- Set follow-up reminders for future engagement.
+
+### 🤖 AI-Powered Suggestions
+- Intelligent suggestions on next actions:
+  - “Send a follow-up email”
+  - “Engage on LinkedIn”
+  - “Wait 2 days and message again”
+
+---
+
+## ⚠️ Known Limitations
+
+- 📊 Dashboard statistics such as **conversion rates**, **tasks**, and **activities** are currently **hardcoded** due to lack of real user data or activity logs.
+
+---
+
+

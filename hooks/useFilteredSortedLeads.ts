@@ -1,4 +1,3 @@
-// hooks/useFilteredSortedLeads.ts
 import { ObjectId } from 'mongodb';
 
 interface Lead {
@@ -8,7 +7,7 @@ interface Lead {
   email: string;
   status: string;
   priority: string;
-  lastContact: string;
+  lastContact: string; // now treated as timestamp (ISO string or number)
   aiSuggestion?: boolean;
   phone: string;
   website?: string;
@@ -19,10 +18,6 @@ interface Lead {
     message: string;
     timestamp: Date;
   }[];
-}
-
-interface TimeMap {
-  [key: string]: number;
 }
 
 const statusRank: Record<string, number> = {
@@ -39,6 +34,7 @@ const priorityRank: Record<string, number> = {
   Low: 3,
 };
 
+
 export const useFilteredSortedLeads = (
   leads: Lead[],
   searchQuery: string,
@@ -54,28 +50,11 @@ export const useFilteredSortedLeads = (
     );
   });
 
-  const timeMap: TimeMap = {
-    hours: 1,
-    day: 24,
-    days: 24,
-    week: 168,
-    weeks: 168,
-    month: 720,
-    months: 720,
-  };
-
-  const getTimeValue = (timeStr: string): number => {
-    const parts = timeStr.split(' ');
-    const num = parseInt(parts[0]);
-    const unit = parts[1];
-    return num * (timeMap[unit] || 1);
-  };
-
   const sortedLeads = [...filteredLeads].sort((a, b) => {
     if (sortBy === 'lastContact') {
-      const numValA = getTimeValue(a.lastContact);
-      const numValB = getTimeValue(b.lastContact);
-      return sortDirection === 'asc' ? numValA - numValB : numValB - numValA;
+      const timeA = new Date(a.lastContact).getTime();
+      const timeB = new Date(b.lastContact).getTime();
+      return sortDirection === 'asc' ? timeA - timeB : timeB - timeA;
     }
 
     if (sortBy === 'status') {
@@ -90,22 +69,29 @@ export const useFilteredSortedLeads = (
       return sortDirection === 'asc' ? rankA - rankB : rankB - rankA;
     }
 
-    let valA =
-      sortBy === 'name'
-        ? a.name
-        : sortBy === 'company'
-        ? a.company
-        : sortBy === 'email'
-        ? a.email
-        : '';
-    let valB =
-      sortBy === 'name'
-        ? b.name
-        : sortBy === 'company'
-        ? b.company
-        : sortBy === 'email'
-        ? b.email
-        : '';
+    let valA = sortBy === 'name'
+      ? a.name
+      : sortBy === 'company'
+      ? a.company
+      : sortBy === 'email'
+      ? a.email
+      : sortBy === 'status'
+      ? a.status
+      : sortBy === 'priority'
+      ? a.priority
+      : '';
+
+    let valB = sortBy === 'name'
+      ? b.name
+      : sortBy === 'company'
+      ? b.company
+      : sortBy === 'email'
+      ? b.email
+      : sortBy === 'status'
+      ? b.status
+      : sortBy === 'priority'
+      ? b.priority
+      : '';
 
     if (typeof valA === 'string' && typeof valB === 'string') {
       return sortDirection === 'asc'
@@ -113,7 +99,9 @@ export const useFilteredSortedLeads = (
         : valB.localeCompare(valA);
     }
 
-    return 0;
+    return sortDirection === 'asc'
+      ? Number(valA) - Number(valB)
+      : Number(valB) - Number(valA);
   });
 
   return sortedLeads;

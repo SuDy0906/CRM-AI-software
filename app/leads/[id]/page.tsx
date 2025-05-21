@@ -162,6 +162,14 @@ export default function LeadDetailPage() {
               <Label>Priority</Label>
               <Badge className={getPriorityColor(lead.priority)}>{lead.priority}</Badge>
             </div>
+            <div>
+              <Label>Website</Label>
+              <p>{lead.website || 'N/A'}</p>
+            </div>
+            <div className="md:col-span-2">
+              <Label>Notes</Label>
+              <p className="whitespace-pre-wrap">{lead.notes || 'No notes available'}</p>
+            </div>
           </div>
         </CardContent>
       </Card>

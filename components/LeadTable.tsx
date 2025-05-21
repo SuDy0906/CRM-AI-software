@@ -116,13 +116,6 @@ export function LeadTable({ searchQuery, sortBy, sortDirection }: LeadTableProps
   const { selected, toggle, toggleAll } = useSelection(sortedLeads);
   const { getTimeAgo } = useTimeAgo();
 
-  
-
-  // Filter leads based on search query
-  
-  
-  // Sort leads
-
   return (
     <>
     {currentLead && (

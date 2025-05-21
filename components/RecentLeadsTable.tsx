@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { MoreHorizontal, ArrowUpRight } from 'lucide-react';
+import { MoreHorizontal, ArrowUpRight, MessageSquare, Edit } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -20,6 +20,31 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ConversationLogModal } from './ConversationLogModal';
+import EditLeadModal from './EditLeadModal';
+import { useLeads } from '@/hooks/useLeads';
+import { useTimeAgo } from '@/hooks/useTimeAgo';
+import { ObjectId } from 'mongodb';
+
+interface Lead {
+  _id: ObjectId;
+  name: string;
+  company: string;
+  email: string;
+  status: string;
+  priority: string;
+  lastContact: string;
+  aiSuggestion?: boolean;
+  phone: string;
+  website?: string;
+  address?: string;
+  source?: string;
+  notes?: string;
+  conversation?: {
+    message: string;
+    timestamp: Date;
+  }[];
+}
 
 const getStatusColor = (status: string) => {
   const statusMap: Record<string, string> = {
@@ -53,40 +78,36 @@ const getInitials = (name: string) => {
 };
 
 export function RecentLeadsTable() {
-  const [leads, setLeads] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentLead, setCurrentLead] = useState<Lead | null>(null);
+  const [conversationModalOpen, setConversationModalOpen] = useState(false);
+  const { leads, updateLead } = useLeads();
+  const {getTimeAgo} = useTimeAgo();
 
-  useEffect(() => {
-    const fetchLeads = async () => {
-      try {
-        const response = await fetch('/api/leads');
-        const data = await response.json();
-        console.log('Fetched leads:', data);
-        setLeads(data);
-      } catch (error) {
-        console.error('Error fetching leads:', error);
-      }
-    };
 
-    fetchLeads();
-  }, []);
 
   const sortedLeads = [...leads].sort((a, b) => new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime());
   const topLeads = sortedLeads.slice(0, 5);
   
-  const getTimeAgo = (dateString: string) => {
-    const diff = Date.now() - new Date(dateString).getTime();
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-  
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
-  };
 
   return (
+    <>
+    {currentLead && (
+          <EditLeadModal
+            lead={currentLead}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onUpdated={updateLead}
+          />
+        )}
+        {currentLead && (
+          <ConversationLogModal
+            leadId={currentLead._id.toString()}
+            isOpen={conversationModalOpen}
+            onClose={() => setConversationModalOpen(false)}
+           
+          />
+        )}
     <div className="rounded-md border">
       <Table>
         <TableHeader>
@@ -100,7 +121,7 @@ export function RecentLeadsTable() {
         </TableHeader>
         <TableBody>
           {topLeads.map(lead => (
-            <TableRow key={lead.id} className="group hover:bg-muted/50">
+            <TableRow key={(lead._id).toString()} className="group hover:bg-muted/50">
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
@@ -131,7 +152,7 @@ export function RecentLeadsTable() {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end">
-                  <Link href={`/leads/${lead.id}`}>
+                  <Link href={`/leads/${lead._id}`}>
                     <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
                       <ArrowUpRight className="h-4 w-4" />
                       <span className="sr-only">View</span>
@@ -145,10 +166,23 @@ export function RecentLeadsTable() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View details</DropdownMenuItem>
-                      <DropdownMenuItem>Edit lead</DropdownMenuItem>
-                      <DropdownMenuItem>Add task</DropdownMenuItem>
-                      <DropdownMenuItem>Log conversation</DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/leads/${lead._id}`} className="cursor-pointer flex w-full items-center">
+                          <ArrowUpRight className="mr-2 h-4 w-4" />
+                          View details
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { setIsModalOpen(true); setCurrentLead(lead); }}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit lead
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        setCurrentLead(lead);
+                        setConversationModalOpen(true);
+                        }}>
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Log conversation
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -158,5 +192,6 @@ export function RecentLeadsTable() {
         </TableBody>
       </Table>
     </div>
+    </>
   );
 }

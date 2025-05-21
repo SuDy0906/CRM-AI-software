@@ -37,7 +37,7 @@ ${(leadDetails.conversation ?? [])
     .map(c => `- (${new Date(c.timestamp).toLocaleString()}): ${c.message}`)
     .join('\n')}
 
-Generate follow-up suggestions just three small points.
+Generate follow-up suggestions just three small points. Make each suggestion of one small line with bullets and no bold characters. Do not include any other text or explanation.
 `;
 
   const response = await ai.models.generateContent({

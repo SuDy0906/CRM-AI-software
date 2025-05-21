@@ -1,7 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+
 const ai = new GoogleGenAI({
-  apiKey: 'AIzaSyCsfIOrKuA3bhU8WxFHAO6XwhgAODYQHjQ',
+  apiKey: GEMINI_API_KEY,
 });
 
 type LeadDetails = {

@@ -32,7 +32,6 @@ export default function SuggestionBox({ isOpen, onClose, leadDetails }: Suggesti
       setLoading(true);
       try {
         const result = await getAISuggestions(leadDetails);
-        console.log('AI Suggestions:', result);
         setSuggestions(result);
       } catch (error) {
         console.error('Error fetching suggestions:', error);

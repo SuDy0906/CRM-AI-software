@@ -26,7 +26,7 @@ export const ConversationLogModal: React.FC<ConversationLogModalProps> = ({
     if (isOpen) {
       fetchConversations();
     }
-  }, [isOpen, leadId]);
+  },);
 
   const fetchConversations = async () => {
     try {
